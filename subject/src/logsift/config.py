@@ -1,6 +1,10 @@
 import os
-import tomllib
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 DEFAULTS = {"min_level": "INFO", "max_lines": 10000}
 
