@@ -1,0 +1,42 @@
+# logsift
+
+Python CLI. All code lives under `subject/`. Run every command below from
+`subject/`. [F9]
+
+## Setup
+
+- System pip may be too old for an editable install of a pyproject-only
+  package; it fails with "editable mode currently requires a setuptools-based
+  build". Use the venv below. [F1]
+- Create the environment:
+  - `python -m venv .venv`
+  - `.\.venv\Scripts\python.exe -m pip install --upgrade pip`
+  - `.\.venv\Scripts\python.exe -m pip install -e .[dev]` [F2, F3]
+
+## Commands
+
+- Test: `.\.venv\Scripts\python.exe -m pytest -q` (10 tests) [F5]
+- Lint: `.\.venv\Scripts\python.exe -m ruff check .` [F6]
+- Run the CLI: `.\.venv\Scripts\logsift.exe <logfile> [--level L] [--contains S] [--counts]` [F7]
+
+## Layout
+
+- Source: `subject/src/logsift/` (parser.py, filters.py, stats.py, config.py,
+  cli.py, main.py). Tests: `subject/tests/`. [F9]
+- The entry point is `logsift.cli:main`, declared in `pyproject.toml`.
+  `src/logsift/main.py` is NOT the entry point; calling it raises SystemExit.
+  Do not add CLI behavior to main.py. [F7]
+
+## Constraints
+
+- Python 3.10 compatibility is required. `import tomllib` alone broke test
+  collection on 3.10; keep the tomli fallback in `src/logsift/config.py` and
+  the conditional tomli dependency in `pyproject.toml`. [F4]
+- Config merge order (asserted by tests/test_config.py): defaults, then
+  `./logsift.toml` in the working directory, then the file named by the
+  `LOGSIFT_CONFIG` environment variable. Later sources override earlier
+  ones. Preserve this order. [F8]
+- Both the test and lint commands above must exit 0 before a change is done.
+  [F5, F6]
+
+Fact tags [Fn] refer to harness/verified-facts.md.
