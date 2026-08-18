@@ -1,0 +1,23 @@
+diff --git a/subject/src/logsift/config.py b/subject/src/logsift/config.py
+index f3039ab..37be74b 100644
+--- a/subject/src/logsift/config.py
++++ b/subject/src/logsift/config.py
+@@ -9,9 +9,16 @@ except ModuleNotFoundError:
+ DEFAULTS = {"min_level": "INFO", "max_lines": 10000}
+ 
+ 
++class ConfigError(Exception):
++    pass
++
++
+ def _read_toml(path) -> dict:
+-    with open(path, "rb") as f:
+-        return tomllib.load(f)
++    try:
++        with open(path, "rb") as f:
++            return tomllib.load(f)
++    except tomllib.TOMLDecodeError as e:
++        raise ConfigError(f"invalid TOML in {path}: {e}") from e
+ 
+ 
+ def load_config(cwd=None) -> dict:

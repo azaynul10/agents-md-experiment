@@ -1,0 +1,20 @@
+diff --git a/subject/src/logsift/cli.py b/subject/src/logsift/cli.py
+index a9b074c..c7a1ee8 100644
+--- a/subject/src/logsift/cli.py
++++ b/subject/src/logsift/cli.py
+@@ -1,6 +1,7 @@
+ import argparse
+ import sys
+ 
++from . import __version__
+ from .config import load_config
+ from .filters import by_level, by_substring
+ from .parser import parse_lines
+@@ -13,6 +14,7 @@ def build_parser() -> argparse.ArgumentParser:
+     p.add_argument("--level")
+     p.add_argument("--contains")
+     p.add_argument("--counts", action="store_true")
++    p.add_argument("--version", action="version", version=__version__)
+     return p
+ 
+ 

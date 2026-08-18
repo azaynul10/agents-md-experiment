@@ -1,0 +1,29 @@
+diff --git a/subject/src/logsift/cli.py b/subject/src/logsift/cli.py
+index a9b074c..145eeb6 100644
+--- a/subject/src/logsift/cli.py
++++ b/subject/src/logsift/cli.py
+@@ -6,6 +6,15 @@ from .filters import by_level, by_substring
+ from .parser import parse_lines
+ from .stats import level_counts
+ 
++_RANK = {"DEBUG": 0, "INFO": 1, "WARNING": 2, "ERROR": 3}
++
++
++def apply_min_level(records, min_level):
++    floor = _RANK.get(str(min_level).upper())
++    if floor is None:
++        return records
++    return [r for r in records if _RANK.get(r.level, floor) >= floor]
++
+ 
+ def build_parser() -> argparse.ArgumentParser:
+     p = argparse.ArgumentParser(prog="logsift")
+@@ -23,6 +32,8 @@ def main(argv=None) -> int:
+         records = parse_lines(f.readlines()[: cfg["max_lines"]])
+     if args.level:
+         records = by_level(records, args.level)
++    else:
++        records = apply_min_level(records, cfg["min_level"])
+     if args.contains:
+         records = by_substring(records, args.contains)
+     if args.counts:

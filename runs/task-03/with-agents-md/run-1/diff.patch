@@ -1,0 +1,15 @@
+diff --git a/subject/src/logsift/filters.py b/subject/src/logsift/filters.py
+index c708c39..2bfdfd4 100644
+--- a/subject/src/logsift/filters.py
++++ b/subject/src/logsift/filters.py
+@@ -2,8 +2,8 @@ from .parser import Record
+ 
+ 
+ def by_level(records: list[Record], level: str) -> list[Record]:
+-    lv = level.upper()
+-    return [r for r in records if r.level == lv]
++    wanted = {part.strip().upper() for part in level.split(",") if part.strip()}
++    return [r for r in records if r.level in wanted]
+ 
+ 
+ def by_substring(records: list[Record], needle: str) -> list[Record]:

@@ -1,0 +1,49 @@
+diff --git a/subject/src/logsift/cli.py b/subject/src/logsift/cli.py
+index a9b074c..2eb4af6 100644
+--- a/subject/src/logsift/cli.py
++++ b/subject/src/logsift/cli.py
+@@ -2,7 +2,7 @@ import argparse
+ import sys
+ 
+ from .config import load_config
+-from .filters import by_level, by_substring
++from .filters import by_level, by_regex, by_substring
+ from .parser import parse_lines
+ from .stats import level_counts
+ 
+@@ -12,6 +12,7 @@ def build_parser() -> argparse.ArgumentParser:
+     p.add_argument("path")
+     p.add_argument("--level")
+     p.add_argument("--contains")
++    p.add_argument("--regex")
+     p.add_argument("--counts", action="store_true")
+     return p
+ 
+@@ -25,6 +26,8 @@ def main(argv=None) -> int:
+         records = by_level(records, args.level)
+     if args.contains:
+         records = by_substring(records, args.contains)
++    if args.regex:
++        records = by_regex(records, args.regex)
+     if args.counts:
+         for k, v in sorted(level_counts(records).items()):
+             print(f"{k} {v}")
+diff --git a/subject/src/logsift/filters.py b/subject/src/logsift/filters.py
+index c708c39..f31c718 100644
+--- a/subject/src/logsift/filters.py
++++ b/subject/src/logsift/filters.py
+@@ -1,3 +1,5 @@
++import re
++
+ from .parser import Record
+ 
+ 
+@@ -8,3 +10,8 @@ def by_level(records: list[Record], level: str) -> list[Record]:
+ 
+ def by_substring(records: list[Record], needle: str) -> list[Record]:
+     return [r for r in records if needle in r.msg]
++
++
++def by_regex(records: list[Record], pattern: str) -> list[Record]:
++    rx = re.compile(pattern)
++    return [r for r in records if rx.search(r.msg)]
