@@ -1,13 +1,14 @@
 # Pitch: a methods post-mortem on measuring AGENTS.md
 
-For the AAIF content submission form. Community contributor, personal
-experience with an AAIF-hosted project.
+For the AAIF blog intake, by whichever route the current guidelines specify.
+Submitted as a community contributor writing about personal experience with an
+AAIF-hosted project.
 
 ## Proposed article
 
 **Working title:** What I Got Wrong Trying to Measure AGENTS.md
 
-**Format:** narrative, first person, roughly 1,000 words.
+**Format:** narrative, first person, roughly 1,350 words.
 
 I built a small harness to test whether adding an AGENTS.md changes how a
 coding agent behaves on an unfamiliar repository: a purpose-built Python CLI,
