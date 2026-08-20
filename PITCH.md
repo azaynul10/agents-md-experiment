@@ -1,8 +1,7 @@
 # Pitch: a methods post-mortem on measuring AGENTS.md
 
-For the AAIF blog intake, by whichever route the current guidelines specify.
-Submitted as a community contributor writing about personal experience with an
-AAIF-hosted project.
+For the AAIF blog intake, by whichever route the guidelines currently specify.
+Community contributor, personal experience with an AAIF-hosted project.
 
 ## Proposed article
 
@@ -23,10 +22,9 @@ script the file listing the correct commands, so it skipped the discovery step
 it was written to fail. A decoy file I planted to catch careless edits never
 fired in 30 runs, which means that instrument was never validated.
 
-The article is about the design errors, not about AGENTS.md. Four things I
-would do differently: a real agent instead of a script, a fresh session per
-run, one pre-registered endpoint, and a trap proven to fire before it counts
-as an instrument.
+The article is about the design errors, not about AGENTS.md. Four fixes: a real
+agent instead of a script, a fresh session per run, one pre-registered
+endpoint, and a trap proven to fire before it counts as an instrument.
 
 **Why it may be useful:** the reversal in "Measuring AGENTS.md: What Five Runs
 Show That One Doesn't" is the reason I report no separation instead of a win. A
@@ -34,5 +32,4 @@ worked example of a harness that failed, and of how to tell, seems worth having
 next to the results that worked.
 
 **Artifact:** code, data, all 30 transcripts, limitations and related work in a
-public repository. The article text is unpublished and would be original to
-AAIF.
+public repository. The article text is unpublished and original to AAIF.
