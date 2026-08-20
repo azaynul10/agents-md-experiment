@@ -2,16 +2,13 @@
 
 ## Agent under test
 
-Runs are executed by a single scripted agent policy (the same assistant that
-built this repository), not by independent fresh agent instances. Two
-consequences, stated up front:
+Runs are executed by a single scripted agent policy (`harness/runner.py`,
+driven by the per-task modules in `harness/solutions/`), not by a language
+model and not by independent fresh agent instances.
 
-1. The "never seen this codebase" premise holds only approximately. The
-   policy below constrains what information the agent may act on, but true
-   ignorance cannot be enforced within one session.
-2. Within-condition variance comes only from the three exploration variants
-   below, not from sampling noise in a model. Variance numbers must be read
-   with that in mind.
+**This is the fact that limits every result. Read `LIMITATIONS.md` before
+using anything produced by this protocol.** The consequences that follow from
+it are listed there as L1, L7 and L9, and are not repeated here.
 
 ## Information policy
 

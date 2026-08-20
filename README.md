@@ -1,7 +1,21 @@
 # agents-md-experiment
 
-A before/after measurement of whether an AGENTS.md file changes coding-agent
-behavior on a small repository the agent has not worked on before.
+A small harness that tries to measure whether an AGENTS.md file changes coding
+agent behaviour on an unfamiliar repository, and a write-up of why this
+attempt could not answer that.
+
+**It found nothing.** Pass rate was 15/15 in both arms. The turn-count gap
+(1.7) is smaller than the spread within one arm (2), so: no separation.
+
+**The reason is the executor.** Runs were driven by a scripted policy, not a
+language model, so the results describe that script. One metric that does
+separate the arms is confounded by construction. Full list:
+`harness/LIMITATIONS.md`. Prior, stronger studies: `RELATED-WORK.md`.
+
+**Run it:** `cd subject`, `python -m venv .venv`,
+`.\.venv\Scripts\python.exe -m pip install -e .[dev]`, then
+`python harness\runner.py --task task-01 --condition without --run 1`.
+Verify the numbers with `python results/recompute.py`.
 
 ## Layout
 
@@ -15,13 +29,20 @@ behavior on a small repository the agent has not worked on before.
 - `tasks/task-01.md` through `task-05.md` - five tasks, each with a pass
   condition checked by running a script. Written before any run, frozen since.
 - `harness/checks/` - the pass-condition scripts. Frozen with the tasks.
-- `harness/run_task.md` - run protocol, information policy, and the known
-  limitations of the harness.
+- `harness/runner.py` - the scripted executor. This, not a language model, is
+  what produced every run.
+- `harness/run_task.md` - run protocol and information policy.
+- `harness/LIMITATIONS.md` - **canonical limitations list, L1 to L11.**
+  Everything else links here rather than restating it.
+- `RELATED-WORK.md` - four public evaluations of context files, all stronger
+  designs than this one, and where this repo stands relative to each.
 - `runs/<task>/<condition>/<run-n>/` - transcript.md and diff.patch per run.
 - `results/README.md` - metric definitions, fixed before logging started.
 - `results/results.csv` - one row per run, 30 rows.
-- `results/summary.md` - per-task pass rates, spread across runs, and the
-  metrics on which the conditions were indistinguishable.
+- `results/recompute.py` - recomputes every number quoted in this repo from
+  the CSV and asserts the dataset shape. Prose defers to its output.
+- `results/summary.md` - what the experiment cannot tell you, then what was
+  measured, then the no-separation result and the confounded metric.
 
 ## Reproducing
 
@@ -34,10 +55,14 @@ path separators; the Python code itself is platform-neutral).
 4. `.\.venv\Scripts\python.exe -m pip install -e .[dev]`
 5. `.\.venv\Scripts\python.exe -m pytest -q` (expect 10 passed)
 6. Follow `harness/run_task.md` for the run matrix.
+7. `python results/recompute.py` from the repo root to verify every quoted
+   number against `results/results.csv`.
 
 ## Scope
 
-The measured subject is the harness policy described in
-`harness/run_task.md`, executed on one small codebase, three runs per cell.
-The sample is too small to support general claims; see
-`results/summary.md` for what was and was not observed.
+What was measured is the scripted policy in `harness/runner.py`, on one small
+synthetic codebase, three runs per cell. Before citing any number from this
+repo, read `harness/LIMITATIONS.md`.
+
+This is an independent experiment. It is not affiliated with, endorsed by, or
+reviewed by any foundation or vendor.
