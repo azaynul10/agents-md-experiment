@@ -17,6 +17,29 @@ separate the arms is confounded by construction. Full list:
 `python harness\runner.py --task task-01 --condition without --run 1`.
 Verify the numbers with `python results/recompute.py`.
 
+## What the null looks like
+
+Every one of the 30 runs, by turns taken. The two arms overlap:
+
+```
+turns per run          7    8    9   10   11   12
+                       |    |    |    |    |    |
+without  (8-12)             *===================*
+with     (7-10)        *==============*
+                            |<overlap>|
+
+mean gap between the two arms ................. 1.7 turns
+spread across the 3 runs of one task, in
+`without` alone ............................... 2 turns  <- exceeds the gap
+```
+
+Re-running the same task three times inside one arm moves the turn count more
+than switching arms does, so there is no separation to report. Pass rate was
+15/15 in both arms, so that metric did not separate them either.
+
+Both figures come from `python results/recompute.py`, which regenerates every
+number in this repo from `results/results.csv`.
+
 ## Layout
 
 - `subject/` - the codebase the agent works on: a Python CLI named logsift
