@@ -1,17 +1,53 @@
 # Results summary
 
-30 runs: 5 tasks x 2 conditions x 3 runs. Metric definitions are in
-results/README.md. The agent policy and its limitations are in
-harness/run_task.md; the variance caveat there applies to every number below.
+Regenerate every number below with `python results/recompute.py`.
 
-## Pass rates
+## What this experiment cannot tell you
 
-Every run passed in both conditions. Per task: 3/3 without, 3/3 with-agents-md,
-for all five tasks. The pass metric did not separate the conditions.
+Read this before any number on this page.
 
-## turns_to_completion
+**It cannot tell you whether AGENTS.md helps a coding agent.** The runs were
+executed by a scripted policy (`harness/runner.py`), not by a language model.
+The script replays a predetermined sequence of reads, edits and commands from
+a per-task solution module. What the tables below describe is the behaviour of
+that script.
 
-Per-task values across run-1/run-2/run-3, with the per-task mean:
+**It cannot tell you anything about cost.** Tokens and wall-clock time were
+never measured, and a scripted policy has no token cost to measure.
+
+**It cannot tell you that agents make fewer mistakes with AGENTS.md.** The one
+metric that separates the two arms is confounded by construction; see
+"One confounded metric" below.
+
+**It cannot tell you that agents avoid decoy files.** The task-04 trap never
+fired in any of the 30 runs, so that instrument is unvalidated.
+
+The canonical list is `harness/LIMITATIONS.md` (L1 to L11). The rest of this
+page assumes it.
+
+## What was actually measured
+
+- **Subject**: `subject/`, a purpose-built Python CLI (logsift) with a `src/`
+  layout, config loaded from two sources, and one decoy file.
+- **Conditions**: `without` (no AGENTS.md in the repo) and `with-agents-md`
+  (a fixed 42-line AGENTS.md copied to `subject/AGENTS.md`).
+- **Tasks**: five, in `tasks/task-01.md` to `task-05.md`. Each has a pass
+  condition enforced by a frozen script in `harness/checks/`, which runs the
+  test suite, the linter, and task-specific functional assertions. Tasks and
+  checks were written before any run and not edited afterwards.
+- **Runs**: 3 per cell, 30 total. Within-arm variation comes from three fixed
+  exploration variants in `harness/run_task.md`, not from model sampling.
+- **Metrics**: defined in `results/README.md` before logging began.
+- **Artifacts**: a numbered transcript and a `diff.patch` per run under
+  `runs/`.
+
+## Result: no separation
+
+**Pass rate.** 15/15 in the `without` arm and 15/15 in the `with-agents-md`
+arm. `tests_pass` likewise 15/15 in both. The tasks were solvable from the
+repository alone, so the checks could not discriminate between the conditions.
+
+**Turns.** Per task, across run-1/run-2/run-3, with per-task means:
 
 | task    | without      | mean | with-agents-md | mean |
 |---------|--------------|------|----------------|------|
@@ -21,21 +57,24 @@ Per-task values across run-1/run-2/run-3, with the per-task mean:
 | task-04 | 10, 12, 11   | 11.0 | 9, 10, 9       | 9.3  |
 | task-05 | 9, 11, 10    | 10.0 | 8, 9, 8        | 8.3  |
 
-Condition means: 10.2 without, 8.5 with-agents-md; mean gap 1.7 turns per run.
-The within-condition spread across the three runs of a task is 2 turns in the
-without condition. That spread exceeds the between-condition mean gap of 1.7,
-so at the level of individual runs the two conditions overlap: the fastest
-without run of a task (its run-1) uses fewer turns than the slowest
-with-agents-md run of the same task (its run-2) in no case, but the ranges
-adjoin within one turn. The gap is also structural rather than emergent: the
-without policy must discover the interpreter and test commands (one failed
-system-interpreter attempt plus one directory listing), while the with
-condition spends one action reading AGENTS.md and skips discovery. The
-difference measures exactly that trade and nothing else.
+Arm means are 10.2 and 8.5, a gap of 1.7 turns. The spread across the three
+runs of a single task reaches 2 turns inside the `without` arm by itself,
+which is larger than the gap between the arms. **Reported as no separation.**
 
-## wrong_command_attempts
+The gap is also mechanical rather than discovered: the `without` policy spends
+actions finding the interpreter and test commands, while the `with-agents-md`
+policy spends one action reading AGENTS.md and skips that discovery. It
+measures that trade and nothing else. See `harness/LIMITATIONS.md` L4.
 
-Per-task values across run-1/run-2/run-3:
+**Metrics that were flat everywhere.** `wrong_file_edits` 0 and
+`clarifying_questions` 0, in all 30 runs. task-04 ships a decoy
+`src/logsift/main.py` whose name invites a wrong edit; **the trap never fired
+once, so that instrument is unvalidated** and nothing follows from those two
+columns in either direction (`harness/LIMITATIONS.md` L5).
+
+## One confounded metric
+
+`wrong_command_attempts`, per task, across run-1/run-2/run-3:
 
 | task    | without   | with-agents-md |
 |---------|-----------|----------------|
@@ -45,31 +84,40 @@ Per-task values across run-1/run-2/run-3:
 | task-04 | 1, 3, 1   | 0, 0, 0        |
 | task-05 | 1, 3, 1   | 0, 0, 0        |
 
-Totals: 27 without (mean 1.8 per run), 2 with-agents-md (mean 0.13). The
-without failures are attempts to run pytest and ruff through the system
-interpreter, which lacks the dev dependencies; AGENTS.md names the venv
-commands, so those attempts do not occur. The two with-agents-md failures on
-task-01 are a findstr search returning no match for a not-yet-written function
-name, which counts under the metric definition even though it is a search
-miss, not a command-discovery failure. The task-01 without runs contain the
-same search miss, so the per-task contrast is unaffected by it.
+Totals: 27 in the `without` arm (1.80 per run) and 2 in the `with-agents-md`
+arm (0.13 per run).
 
-## Metrics on which the conditions were indistinguishable
+**This metric is confounded and is not evidence about AGENTS.md.** The
+executor is a scripted policy. In the `with-agents-md` arm the script was
+handed the file that lists the correct virtualenv commands, so it never
+attempted discovery. In the `without` arm the script was written to try the
+system interpreter first, which lacks the dev dependencies, and fail. The
+difference was fixed in the harness before the first run executed. Fewer wrong
+commands here is a property of the script, not a behaviour of an agent reading
+a context file (`harness/LIMITATIONS.md` L2).
 
-- pass: 15/15 in both conditions.
-- tests_pass: 15/15 in both conditions.
-- wrong_file_edits: 0 in all 30 runs. The task-04 trap (a misleading main.py)
-  produced no wrong-file edit in either condition, because the scripted policy
-  never selects a file by name resemblance; a policy that did could behave
-  differently, and this harness cannot observe that.
-- clarifying_questions: 0 in all 30 runs; the scripted policy never asks.
+The two nonzero cells in the `with-agents-md` arm are task-01 run-2 and run-3,
+where a `findstr` search returns no match for a function that does not exist
+yet. That is a search miss, not a command-discovery failure, and it counts only
+because the metric definition counts any nonzero exit. The same miss occurs in
+the corresponding `without` runs.
 
-## Limitations
+## What would make a v2 valid
 
-The sample is 3 runs per cell on one small synthetic codebase with one
-scripted agent policy, which is too small and too constrained to generalize.
-Within-condition variance comes only from three fixed exploration variants,
-not from model sampling, so the spread figures understate the variance a
-stochastic agent would show. The same session that wrote the codebase also
-executed the runs, so the no-prior-knowledge premise holds only as far as the
-information policy in harness/run_task.md enforces it.
+1. **A real LLM executor.** Replace `harness/runner.py` with an actual coding
+   agent. Without this, nothing else on the list matters.
+2. **A fresh session per run**, so no run inherits knowledge of the subject,
+   the tasks, or the checks from the session that wrote them.
+3. **At least three model families**, since a single agent's results have
+   already been shown elsewhere not to transfer (`RELATED-WORK.md`).
+4. **One pre-registered primary endpoint**, declared before runs begin, with
+   the secondary metrics marked as exploratory.
+5. **Blinded scoring**, so whoever grades a run cannot tell which arm it came
+   from.
+6. **A trap demonstrated to fire at least once** before it is used as an
+   instrument. An unvalidated trap that reads 0 is indistinguishable from a
+   broken one.
+7. **Cost measured**, in tokens and wall-clock time, which requires item 1.
+8. **Enough runs per cell to characterise the noise**, established from pilot
+   variance rather than assumed.
+
